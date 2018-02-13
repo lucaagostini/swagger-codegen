@@ -111,7 +111,7 @@ public class FinchServerCodegen extends DefaultCodegen implements CodegenConfig 
         }
 
         supportingFiles.add(new SupportingFile("README.mustache", "", "README.md"));
-        supportingFiles.add(new SupportingFile("build.sbt", "", "build.sbt"));
+        supportingFiles.add(new SupportingFile("build.mustache", "", "build.sbt"));
         supportingFiles.add(new SupportingFile("Server.mustache", sourceFolder, "Server.scala"));
         supportingFiles.add(new SupportingFile("DataAccessor.mustache", sourceFolder, "DataAccessor.scala"));
 
