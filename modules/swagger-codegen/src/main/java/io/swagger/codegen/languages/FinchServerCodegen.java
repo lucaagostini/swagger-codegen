@@ -112,15 +112,9 @@ public class FinchServerCodegen extends DefaultCodegen implements CodegenConfig 
 
         supportingFiles.add(new SupportingFile("README.mustache", "", "README.md"));
         supportingFiles.add(new SupportingFile("build.mustache", "", "build.sbt"));
-        supportingFiles.add(new SupportingFile("Server.mustache", sourceFolder, "Server.scala"));
-        supportingFiles.add(new SupportingFile("DataAccessor.mustache", sourceFolder, "DataAccessor.scala"));
-
         supportingFiles.add(new SupportingFile("project/build.properties", "project", "build.properties"));
         supportingFiles.add(new SupportingFile("project/plugins.sbt", "project", "plugins.sbt"));
         supportingFiles.add(new SupportingFile("sbt", "", "sbt"));
-
-        supportingFiles.add(new SupportingFile("endpoint.mustache", sourceFolder, "endpoint.scala"));
-        supportingFiles.add(new SupportingFile("errors.mustache", sourceFolder, "errors.scala"));
 
         languageSpecificPrimitives = new HashSet<String>(
                 Arrays.asList(
@@ -192,6 +186,10 @@ public class FinchServerCodegen extends DefaultCodegen implements CodegenConfig 
         return outputFolder + File.separator + sourceFolder + File.separator + modelPackage().replace('.', File.separatorChar);
     }
 
+    private String packageFileFolder() {
+        return sourceFolder + File.separator + packageName.replace('.', File.separatorChar);
+    }
+
     /**
      * Convert Swagger Model object to Codegen Model object
      *
@@ -204,6 +202,20 @@ public class FinchServerCodegen extends DefaultCodegen implements CodegenConfig 
     public CodegenModel fromModel(String name, Model model, Map<String, Model> allDefinitions) {
         CodegenModel codegenModel = super.fromModel(name, model, allDefinitions);
         return codegenModel;
+    }
+
+    @Override
+    public void processOpts() {
+        super.processOpts();
+        if (additionalProperties.containsKey(CodegenConstants.PACKAGE_NAME)) {
+            this.setPackageName((String) additionalProperties.get(CodegenConstants.PACKAGE_NAME));
+        }
+
+        supportingFiles.add(new SupportingFile("Server.mustache", packageFileFolder(), "Server.scala"));
+        supportingFiles.add(new SupportingFile("DataAccessor.mustache", packageFileFolder(), "DataAccessor.scala"));
+
+        supportingFiles.add(new SupportingFile("endpoint.mustache", packageFileFolder(), "endpoint.scala"));
+        supportingFiles.add(new SupportingFile("errors.mustache", packageFileFolder(), "errors.scala"));
     }
 
 
