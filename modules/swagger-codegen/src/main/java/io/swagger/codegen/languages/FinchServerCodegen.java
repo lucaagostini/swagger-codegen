@@ -2,6 +2,7 @@ package io.swagger.codegen.languages;
 
 import io.swagger.codegen.*;
 import io.swagger.models.Model;
+import io.swagger.models.Swagger;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.Property;
@@ -20,6 +21,7 @@ public class FinchServerCodegen extends DefaultCodegen implements CodegenConfig 
     protected String artifactVersion = "1.0.0";
     protected String sourceFolder = "src/main/scala";
     protected String packageName = "io.swagger";
+    protected String basePath = "/";
 
     public FinchServerCodegen() {
         super();
@@ -205,12 +207,20 @@ public class FinchServerCodegen extends DefaultCodegen implements CodegenConfig 
     }
 
     @Override
+    public void preprocessSwagger(Swagger swagger) {
+        if (swagger.getBasePath() != null && !swagger.getBasePath().isEmpty()) {
+            this.basePath = swagger.getBasePath();
+        } else {
+            this.basePath = "/";
+        }
+    }
+
+    @Override
     public void processOpts() {
         super.processOpts();
         if (additionalProperties.containsKey(CodegenConstants.PACKAGE_NAME)) {
             this.setPackageName((String) additionalProperties.get(CodegenConstants.PACKAGE_NAME));
         }
-
         supportingFiles.add(new SupportingFile("Server.mustache", packageFileFolder(), "Server.scala"));
         supportingFiles.add(new SupportingFile("DataAccessor.mustache", packageFileFolder(), "DataAccessor.scala"));
 
@@ -361,7 +371,8 @@ public class FinchServerCodegen extends DefaultCodegen implements CodegenConfig 
     private void generateScalaPath(CodegenOperation op) {
         op.httpMethod = op.httpMethod.toLowerCase();
 
-        String path = new String(op.path);
+        String basePath = new String(this.basePath);
+        String path = new String(basePath + "/" + op.path);
 
         // remove first /
         if (path.startsWith("/")) {
@@ -373,7 +384,7 @@ public class FinchServerCodegen extends DefaultCodegen implements CodegenConfig 
             path = path.substring(0, path.length()-1);
         }
 
-        String[] items = path.split("/", -1);
+        String[] items = path.replaceAll("/{2,}", "/").split("/", -1);
         String scalaPath = "";
         Integer pathParamIndex = 0;
 
