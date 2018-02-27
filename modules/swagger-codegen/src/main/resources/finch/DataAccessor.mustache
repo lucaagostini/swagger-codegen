@@ -4,6 +4,7 @@ package {{packageName}}
 import java.io._
 import java.util.UUID
 import java.time._
+import scala.concurrent.Future
 
 
 import {{modelPackage}}._
@@ -20,7 +21,7 @@ trait DataAccessor {
         * {{{description}}}
         * @return A {{#returnType}}{{returnType}}{{/returnType}}{{^returnType}}Unit{{/returnType}}
         */
-        def {{baseName}}_{{operationId}}({{{vendorExtensions.x-codegen-typedParams}}}): Either[CommonError,{{#returnType}}{{returnType}}{{/returnType}}{{^returnType}}Unit{{/returnType}}] = ???
+        def {{baseName}}_{{operationId}}({{{vendorExtensions.x-codegen-typedParams}}}): Future[GenericResponse[{{#returnType}}{{returnType}}{{/returnType}}{{^returnType}}Unit{{/returnType}}]] = ???
 
     {{/operation}}
 {{/operations}}

@@ -1,0 +1,36 @@
+package {{packageName}}
+
+import com.twitter.util.{Future => TFuture, Promise => TPromise, Return, Throw}
+import scala.concurrent.{Future => SFuture, Promise => SPromise, ExecutionContext}
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
+import scala.util.{Success, Failure}
+
+object RichFuture {
+
+  implicit class RichTFuture[A](f: TFuture[A]) {
+    def asScala(implicit e: ExecutionContext): SFuture[A] = {
+      val p: SPromise[A] = SPromise()
+      f.respond {
+        case Return(value) => p.success(value)
+        case Throw(exception) => p.failure(exception)
+      }
+      p.future
+    }
+  }
+
+  implicit class RichSFuture[A](f: SFuture[A]) {
+    def asTwitter(implicit e: ExecutionContext): TFuture[A] = {
+      val p: TPromise[A] = new TPromise[A]
+      f.onComplete {
+        case Success(value) => p.setValue(value)
+        case Failure(exception) => p.setException(exception)
+      }
+      p
+    }
+  }
+
+  implicit class RichFuture[T](future: Future[T]) {
+    def await(implicit duration: Duration = 60.seconds): T = Await.result(future, duration)
+  }
+}

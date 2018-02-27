@@ -222,6 +222,9 @@ public class FinchServerCodegen extends DefaultCodegen implements CodegenConfig 
             this.setPackageName((String) additionalProperties.get(CodegenConstants.PACKAGE_NAME));
         }
         supportingFiles.add(new SupportingFile("Server.mustache", packageFileFolder(), "Server.scala"));
+        supportingFiles.add(new SupportingFile("GenericResponse.mustache", packageFileFolder(), "GenericResponse.scala"));
+        supportingFiles.add(new SupportingFile("GenericHeader.mustache", packageFileFolder(), "GenericHeader.scala"));
+        supportingFiles.add(new SupportingFile("RichFuture.mustache", packageFileFolder(), "RichFuture.scala"));
         supportingFiles.add(new SupportingFile("DataAccessor.mustache", packageFileFolder(), "DataAccessor.scala"));
 
         supportingFiles.add(new SupportingFile("endpoint.mustache", packageFileFolder(), "endpoint.scala"));

@@ -3,6 +3,7 @@ package {{apiPackage}}
 import java.io._
 import {{packageName}}._
 import {{modelPackage}}._
+import {{packageName}}.RichFuture._
 {{#imports}}import {{import}}
 {{/imports}}
 import io.finch.circe._
@@ -10,15 +11,18 @@ import io.circe.generic.semiauto._
 import com.twitter.concurrent.AsyncStream
 import com.twitter.finagle.Service
 import com.twitter.finagle.Http
-import com.twitter.finagle.http.{Request, Response}
-import com.twitter.finagle.http.exp.Multipart.{FileUpload, InMemoryFileUpload, OnDiskFileUpload}
+import com.twitter.finagle.http.{ Request, Status }
+import com.twitter.finagle.http.exp.Multipart.{ FileUpload, InMemoryFileUpload, OnDiskFileUpload }
 import com.twitter.util.Future
 import com.twitter.io.Buf
 import io.finch._, items._
-import java.io.File
-import java.time._
+import java.io._
+import java.time.{LocalDateTime, ZonedDateTime}
+import java.util.Date
+import scala.concurrent.ExecutionContext
 
-object {{classname}} {
+case class {{classname}}(ec:ExecutionContext) {
+    implicit val executionContext = ec
     /**
     * Compiles all service endpoints.
     * @return Bundled compilation of all service endpoints.
@@ -59,12 +63,15 @@ object {{classname}} {
         */
         private def {{operationId}}(da: DataAccessor): Endpoint[{{#returnType}}{{returnType}}{{/returnType}}{{^returnType}}Unit{{/returnType}}] =
         {{httpMethod}}({{{vendorExtensions.x-codegen-paths}}}) { {{#hasParams}}({{{vendorExtensions.x-codegen-typedParams}}}) => {{/hasParams}}
-          da.{{baseName}}_{{operationId}}({{{vendorExtensions.x-codegen-params}}}) match {
-            case Left(error) => checkError(error)
-            case Right(data) => Ok(data)
+          da.{{baseName}}_{{operationId}}({{{vendorExtensions.x-codegen-params}}}).asTwitter.map { v =>
+            v.headers
+              .filter(_.value.nonEmpty)
+              .groupBy(_.name)
+              .map{case(name, values) => name -> values.map(_.value).mkString(",")}
+              .foldLeft(Output.payload(v.entity, Status.fromCode(v.status)))((out, h) =>
+                out.withHeader(h._1 -> h._2)
+              )
           }
-        } handle {
-          case e: Exception => BadRequest(e)
         }
 
         {{/operation}}

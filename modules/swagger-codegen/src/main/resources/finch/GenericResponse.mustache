@@ -1,0 +1,13 @@
+package {{packageName}}
+
+case class GenericResponse[T](
+status: Int,
+headers: Seq[GenericHeader],
+entity: T
+)
+
+object GenericResponse {
+def Ok[T](entity: T): GenericResponse[T] = new GenericResponse(200, Seq.empty, entity)
+def Ok[T](entity: T, headers:Seq[GenericHeader]): GenericResponse[T] = new GenericResponse(200, headers, entity)
+def apply[T](status: Int, entity: T): GenericResponse[T] = new GenericResponse(status, Nil, entity)
+}

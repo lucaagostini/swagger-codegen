@@ -13,14 +13,17 @@ import com.twitter.util.{Await, Future}
 
 {{#imports}}import {{import}}
 {{/imports}}
-
+/*
 class Server {
 
   // Loads implementation defined in resources/META-INF/services/{{packageName}}.DataAccessor
   val impls: Seq[DataAccessor] = LoadService[DataAccessor]()
   val db = if (impls.isEmpty) new DataAccessor { } else impls.head
-
-  val service = endpoint.makeService(db)
+  val errorHandler: PartialFunction[Exception, GenericResponse[String]] = {
+    case e: Exception =>
+      GenericResponse(500, "Unexpected error: " + e.getMessage)
+  }
+  val service = endpoint.makeService(db, errorHandler)
 
   val server = Http.serve(":8080", service) //creates service
 
@@ -35,3 +38,4 @@ class Server {
 object Server extends Server with App {
   Await.ready(server)
 }
+*/
